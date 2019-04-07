@@ -6,20 +6,25 @@ module.exports = function() {
   }
 
   const phone = String(req.body.phone).replace(/[^\d]/g, "");
-  const code = parseInt(code);
+  const code = parseInt(req.body);
 
   admin
     .auth()
     .getUser(phone)
     .then(() => {
-      cons ref = admin.database().ref("users/" + phone);
+      const ref = admin.database().ref("users/" + phone);
       ref.on("value", snapshot => {
+        ref.off();
         const user = snapshot.val();
 
         if (user.code !== code || !user.codeValid) {
           return res.status(422).send({ error: "Code not valid" });
         }
         ref.update({ codeValid: false });
+        admin
+          .auth()
+          .createCustomToken(phone)
+          .then(token => res.send({ token: token }));
       });
     })
     .catch(err => res.status(422).send({ error: err }));
