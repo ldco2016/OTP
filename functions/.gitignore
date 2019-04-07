@@ -1,5 +1,4 @@
 node_modules/
 
 service_account.json
-
-twilio.js
+functions/twilio.js
